@@ -1,3 +1,20 @@
+<?php
+include 'functions.php';
+
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
+    // Get the form values
+    $email = trim($_POST['email']);
+    $password = trim($_POST['password']);
+
+    // Proceed to check credentials without validation
+    if (validateUser($email, $password)) {
+        header("Location: ../admin/dashboard.php");
+        exit();
+    } else {
+        $error = "Invalid email or password.";
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -5,7 +22,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <title></title>
+    <title>Login</title>
 </head>
 
 <body class="bg-secondary-subtle">
