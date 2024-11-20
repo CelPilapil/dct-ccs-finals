@@ -116,3 +116,19 @@ function insertSubject($subject_code, $subject_name, &$errors) {
         return false;
     }
 }
+function getSubjectDetails($subject_id, $conn) {
+    $query = "SELECT * FROM subjects WHERE id = :id";
+    $stmt = $conn->prepare($query);
+    $stmt->bindParam(':id', $subject_id, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
+// Function to delete a subject from the database
+function deleteSubject($subject_id, $conn) {
+    $delete_query = "DELETE FROM subjects WHERE id = :id";
+    $delete_stmt = $conn->prepare($delete_query);
+    $delete_stmt->bindParam(':id', $subject_id, PDO::PARAM_INT);
+    
+    return $delete_stmt->execute();
+}
