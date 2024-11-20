@@ -1,11 +1,16 @@
 <?php
+ob_start();  // Start output buffering
+
 
 // Include the functions.php file
 require_once '../../functions.php';  
 require_once '../partials/header.php';  
 require_once '../partials/side-bar.php';  
 
+// Initialize error message variable
+$error_message = '';
 
+// Get the subject ID from the URL query parameter and validate it
 $subject_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 if (!$subject_id) {
     header("Location: add.php"); // Redirect if no valid ID is provided
@@ -84,5 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_subject'])) {
 
 </main>
 
-<?php require_once '../partials/footer.php';
+<?php
+require_once '../partials/footer.php';
+ob_end_flush(); // End output buffering and send output
 ?>
