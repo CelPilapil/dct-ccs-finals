@@ -39,4 +39,21 @@ function validateUser($email, $password) {
 function checkUserSession() {
     return isset($_SESSION['user_id']);
 }
+
+function validateLoginInput($email, $password) {
+    $errors = [];
+
+    if (empty($email)) {
+        $errors[] = "Email is required.";
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errors[] = "Invalid email format.";
+    }
+
+    if (empty($password)) {
+        $errors[] = "Password is required.";
+    }
+
+    return $errors;
+}
+
 ?>
