@@ -1,9 +1,10 @@
 <?php
 require_once '../../functions.php';
 require_once '../partials/header.php';
- require_once '../partials/side-bar.php'; 
 
-
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 $errors = []; // Error messages array
 $success_message = ''; // Success message
@@ -22,59 +23,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
         }
     }
 }
-
-function validateSubjectInput($subject_code, $subject_name, &$errors) {
-    if (empty($subject_code)) {
-        $errors[] = "Subject code is required.";
-    } elseif (strlen($subject_code) != 4) {
-        $errors[] = "Subject code must be exactly 4 characters.";
-    }
-
-    if (empty($subject_name)) {
-        $errors[] = "Subject name is required.";
-    }
-
-    return empty($errors);
-}
-
-function insertSubject($subject_code, $subject_name, &$errors) {
-    $conn = connectToDatabase();
-
-    // Check for duplicate subject code
-    $stmt = $conn->prepare("SELECT * FROM subjects WHERE subject_code = :subject_code");
-    $stmt->bindParam(':subject_code', $subject_code);
-    $stmt->execute();
-    if ($stmt->fetch(PDO::FETCH_ASSOC)) {
-        $errors[] = "Subject code already exists.";
-        return false;
-    }
-
-    // Check for duplicate subject name
-    $stmt = $conn->prepare("SELECT * FROM subjects WHERE subject_name = :subject_name");
-    $stmt->bindParam(':subject_name', $subject_name);
-    $stmt->execute();
-    if ($stmt->fetch(PDO::FETCH_ASSOC)) {
-        $errors[] = "Subject name already exists.";
-        return false;
-    }
-
-    // Insert new subject
-    $stmt = $conn->prepare("INSERT INTO subjects (subject_code, subject_name) VALUES (:subject_code, :subject_name)");
-    $stmt->bindParam(':subject_code', $subject_code);
-    $stmt->bindParam(':subject_name', $subject_name);
-    if ($stmt->execute()) {
-        return true;
-    } else {
-        $errors[] = "Error adding subject. Please try again.";
-        return false;
-    }
-}
 ?>
 
 <div class="container-fluid">
     <div class="row">
+            <!-- Sidebar content -->
+            <?php require_once '../partials/side-bar.php'; ?>
         <div class="col-md-9 col-lg-10">
-            <div class="pt-5">
+            <div class="pt-3">
                 <h3 class="card-title">Add a New Subject</h3><br>
                 <nav aria-label="breadcrumb" class="mb-3">
                     <ol class="breadcrumb mb-0">
