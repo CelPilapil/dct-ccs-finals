@@ -70,6 +70,20 @@ function validateSubjectInput($subject_code, $subject_name, &$errors) {
     return empty($errors);
 }
 
+function subjectExists($value, $field, &$errors) {
+    $conn = connectToDatabase();
+    $stmt = $conn->prepare("SELECT * FROM subjects WHERE $field = :value");
+    $stmt->bindParam(':value', $value);
+    $stmt->execute();
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($result) {
+        $errors[] = ucfirst($field) . " already exists.";
+        return true;
+    }
+    return false;
+}
+
 function insertSubject($subject_code, $subject_name, &$errors) {
     $conn = connectToDatabase();
 
@@ -102,5 +116,3 @@ function insertSubject($subject_code, $subject_name, &$errors) {
         return false;
     }
 }
-
-?>
