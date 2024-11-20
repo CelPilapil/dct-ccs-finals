@@ -1,13 +1,13 @@
 <?php
-require_once '../../functions.php';
+require_once '../../functions.php'; // Including functions.php
 require_once '../partials/header.php';
 
 if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+    session_start(); // Start session if not already started
 }
 
-$errors = []; // Error messages array
-$success_message = ''; // Success message
+$errors = []; // Initialize error messages array
+$success_message = ''; // Success message variable
 
 // Handle Add Subject Form Submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] === 'add') {
@@ -15,9 +15,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
     $subject_name = trim($_POST['subject_name']);
 
     // Validate input
-    if (validateSubjectInput($subject_code, $subject_name, $errors)) {
+    validateSubjectInput($subject_code, $subject_name, $errors);
+
+    // If no errors in validation, proceed with subject insertion
+    if (empty($errors)) {
         if (insertSubject($subject_code, $subject_name, $errors)) {
             $success_message = "Subject added successfully.";
+            // Redirect after successful submission to prevent resubmission on refresh
             header("Location: " . $_SERVER['PHP_SELF']);
             exit();
         }
@@ -27,8 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
 
 <div class="container-fluid">
     <div class="row">
-            <!-- Sidebar content -->
-            <?php require_once '../partials/side-bar.php'; ?>
+        <?php require_once '../partials/side-bar.php'; ?>
         <div class="col-md-9 col-lg-10">
             <div class="pt-3">
                 <h3 class="card-title">Add a New Subject</h3><br>
@@ -38,6 +41,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
                         <li class="breadcrumb-item active" aria-current="page">Add Subject</li>
                     </ol>
                 </nav>
+
+                <!-- Display success message -->
+                <?php if (!empty($success_message)): ?>
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <?php echo htmlspecialchars($success_message); ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                <?php endif; ?>
+
+                <!-- Display errors -->
+                <?php if (!empty($errors)): ?>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <strong>System Errors</strong>
+                        <ul>
+                            <?php foreach ($errors as $error): ?>
+                                <li><?php echo htmlspecialchars($error); ?></li>
+                            <?php endforeach; ?>
+                        </ul>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                <?php endif; ?>
+
                 <!-- Subject Form -->
                 <div class="card mb-4">
                     <div class="card-body">
