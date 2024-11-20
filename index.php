@@ -1,17 +1,23 @@
 <?php
 include 'functions.php';
 
+$errors = [];
+
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
-    // Get the form values
     $email = trim($_POST['email']);
     $password = trim($_POST['password']);
 
-    // Proceed to check credentials without validation
-    if (validateUser($email, $password)) {
-        header("Location: ../admin/dashboard.php");
-        exit();
-    } else {
-        $error = "Invalid email or password.";
+    // Validate email and password
+    $errors = validateLoginInput($email, $password);
+
+    // If there are no validation errors, proceed to check credentials
+    if (empty($errors)) {
+        if (validateUser($email, $password)) {
+            header("Location: ../admin/dashboard.php");
+            exit();
+        } else {
+            $errors[] = "Invalid email or password.";
+        }
     }
 }
 ?>
@@ -29,6 +35,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
     <div class="d-flex align-items-center justify-content-center vh-100">
         <div class="col-3">
             <!-- Server-Side Validation Messages should be placed here -->
+            <?php if (!empty($errors)): ?>
+                <div class="alert alert-danger alert-dismissible w-100" role="alert">
+                    <strong>System Errors</strong>
+                    <ul class="mb-0">
+                        <?php foreach ($errors as $error): ?>
+                            <li><?php echo htmlspecialchars($error); ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="font-size: 0.8rem;"></button>
+                </div>
+            <?php endif; ?>
+            
             <div class="card">
                 <div class="card-body">
                     <h1 class="h3 mb-4 fw-normal">Login</h1>
@@ -53,3 +71,5 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
 </body>
 
 </html>
+
+<?php include 'admin/partials/footer.php'; ?>
