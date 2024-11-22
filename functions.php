@@ -190,3 +190,47 @@ function displayMessage($message, $type = 'success') {
     echo '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
     echo '</div>';
 }
+
+// Function to retrieve student data
+function getStudentData($student_id) {
+    global $errors;
+    $conn = connectToDatabase();
+    try {
+        $stmt = $conn->prepare("SELECT * FROM students WHERE id = :id");
+        $stmt->bindParam(':id', $student_id, PDO::PARAM_INT);
+        $stmt->execute();
+        $student_data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$student_data) {
+            $errors[] = "Student not found.";
+        }
+
+        return $student_data;
+    } catch (PDOException $e) {
+        $errors[] = "Error retrieving student details: " . $e->getMessage();
+        return false;
+    }
+}
+
+// Function to update student data
+function updateStudentData($student_id, $first_name, $last_name) {
+    global $errors;
+    $conn = connectToDatabase();
+
+    try {
+        $stmt = $conn->prepare("UPDATE students SET first_name = :first_name, last_name = :last_name WHERE id = :id");
+        $stmt->bindParam(':first_name', $first_name, PDO::PARAM_STR);
+        $stmt->bindParam(':last_name', $last_name, PDO::PARAM_STR);
+        $stmt->bindParam(':id', $student_id, PDO::PARAM_INT);
+
+        if ($stmt->execute()) {
+            return true;
+        } else {
+            $errors[] = "Error updating student. Please try again.";
+            return false;
+        }
+    } catch (PDOException $e) {
+        $errors[] = "Error updating student: " . $e->getMessage();
+        return false;
+    }
+}
