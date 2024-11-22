@@ -2,9 +2,7 @@
 require_once '../../functions.php';
 require_once '../partials/header.php';
 
-
 $student_data = ['student_id' => '', 'first_name' => '', 'last_name' => ''];
-
 
 // Check if student ID is provided via GET request for editing
 if (isset($_GET['id'])) {
@@ -22,8 +20,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Proceed with updating the student if no validation errors
     if (empty($errors)) {
         if (updateStudentData($student_id, $first_name, $last_name)) {
-            // Redirect after successful update
-            header("Location: add.php"); // Assuming 'add.php' is the page listing students
+            // Redirect to register.php (the page listing students)
+            header("Location: register.php");
             exit();
         }
     }
@@ -64,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <div class="card mb-4">
                 <div class="card-body">
                     <form action="" method="POST">
-                        <input type="hidden" name="student_id" value="<?php echo htmlspecialchars($student_data['id']); ?>">
+                        <input type="hidden" name="student_id" value="<?php echo htmlspecialchars($student_data['student_id']); ?>">
                         <div class="mb-3">
                             <label for="student_id" class="form-label">Student ID</label>
                             <input type="text" class="form-control" id="student_id" name="student_id" value="<?php echo htmlspecialchars($student_data['student_id']); ?>" readonly>
