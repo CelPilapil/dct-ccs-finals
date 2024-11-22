@@ -59,10 +59,7 @@ function validateLoginInput($email, $password) {
 function validateSubjectInput($subject_code, $subject_name, &$errors) {
     if (empty($subject_code)) {
         $errors[] = "Subject code is required.";
-    } elseif (strlen($subject_code) != 4) {
-        $errors[] = "Subject code must be exactly 4 characters.";
     }
-
     if (empty($subject_name)) {
         $errors[] = "Subject name is required.";
     }
@@ -138,4 +135,58 @@ function logout() {
     session_destroy(); 
     header("Location: ../index.php"); // Redirect to login page
     exit(); 
+}
+
+// Function to validate student data
+function validateStudentData($student_id, $student_first_name, $student_last_name) {
+    $errors = [];
+
+    if (empty($student_id) || !ctype_digit($student_id)) {
+        $errors[] = "Student ID must be a valid integer.";
+    }
+    if (empty($student_first_name)) {
+        $errors[] = "Student first name is required.";
+    }
+    if (empty($student_last_name)) {
+        $errors[] = "Student last name is required.";
+    }
+
+    return $errors;
+}
+
+// Function to insert new student data
+function insertStudent($student_id, $student_first_name, $student_last_name) {
+    try {
+        $conn = connectToDatabase();
+        $stmt = $conn->prepare("INSERT INTO students (student_id, first_name, last_name) VALUES (:student_id, :first_name, :last_name)");
+        $stmt->bindParam(':student_id', $student_id, PDO::PARAM_INT);
+        $stmt->bindParam(':first_name', $student_first_name, PDO::PARAM_STR);
+        $stmt->bindParam(':last_name', $student_last_name, PDO::PARAM_STR);
+
+        return $stmt->execute();
+    } catch (Exception $e) {
+        return false;
+    } finally {
+        $conn = null;
+    }
+}
+
+// Function to fetch all students from the database
+function getAllStudents() {
+    try {
+        $conn = connectToDatabase();
+        $stmt = $conn->query("SELECT * FROM students");
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $e) {
+        return [];
+    } finally {
+        $conn = null;
+    }
+}
+
+function displayMessage($message, $type = 'success') {
+    echo '<div class="alert alert-' . $type . ' alert-dismissible fade show" role="alert">';
+    echo htmlspecialchars($message);
+    echo '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
+    echo '</div>';
 }
