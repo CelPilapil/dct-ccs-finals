@@ -2,39 +2,33 @@
 require_once '../../functions.php'; 
 require_once '../partials/header.php';
 
-if (!isset($_SESSION['students'])) {
-    $_SESSION['students'] = []; // Initialize empty student list
+if (session_status() === PHP_SESSION_NONE) {
+    session_start(); 
 }
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['action'] === 'add') {
+$errors = []; 
+$success_message = ''; 
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['action'] === 'add') {
     $student_id = trim($_POST['student_id']);
     $student_first_name = trim($_POST['student_first_name']);
     $student_last_name = trim($_POST['student_last_name']);
 
-    // Validate input
-    if (empty($student_id) || !ctype_digit($student_id)) {
-        $errors[] = "Student ID must be a valid integer.";
-    }
-    if (empty($student_first_name)) {
-        $errors[] = "Student first name is required.";
-    }
-    if (empty($student_last_name)) {
-        $errors[] = "Student last name is required.";
-    }
+    // Validate student data
+    $errors = validateStudentData($student_id, $student_first_name, $student_last_name);
 
-    // Add student to session if no errors
+    // If no errors, try to insert the student
     if (empty($errors)) {
-        $student_data = [
-            'student_id' => $student_id,
-            'first_name' => $student_first_name,
-            'last_name' => $student_last_name,
-        ];
-        $_SESSION['students'][] = $student_data;
-        $success_message = "Student added successfully.";
+        if (insertStudent($student_id, $student_first_name, $student_last_name)) {
+            $success_message = "Student added successfully.";
+            header("Location: " . $_SERVER['PHP_SELF']);
+            exit();
+        } else {
+            $errors[] = "Failed to add student. Please try again.";
+        }
     }
 }
 ?>
-
 
 <div class="container-fluid">
     <div class="row">
@@ -51,23 +45,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['action'] === 'add') {
 
                 <!-- Display success message -->
                 <?php if (!empty($success_message)): ?>
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <?php echo htmlspecialchars($success_message); ?>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
+                    <?php displayMessage($success_message, 'success'); ?>
                 <?php endif; ?>
 
                 <!-- Display errors -->
                 <?php if (!empty($errors)): ?>
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <strong>System Errors</strong>
-                        <ul>
-                            <?php foreach ($errors as $error): ?>
-                                <li><?php echo htmlspecialchars($error); ?></li>
-                            <?php endforeach; ?>
-                        </ul>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
+                    <?php displayMessage(implode('<br>', $errors), 'danger'); ?>
                 <?php endif; ?>
 
                 <!-- Student Form -->
@@ -92,10 +75,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['action'] === 'add') {
                     </div>
                 </div>
 
-                <!-- Student List -->
+               <!-- Student List -->
                 <div class="card mb-4">
                     <div class="card-body">
-                        <h5 class="card-title">Student List</h5>
+                        <h5 class="card-title ms-3">Student List</h5> 
                         <div class="table-responsive">
                             <table class="table">
                                 <thead>
@@ -107,24 +90,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['action'] === 'add') {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                <?php if (!empty($_SESSION['students'])): ?>
-                                    <?php foreach ($_SESSION['students'] as $student): ?>
+                                    <?php
+                                    $students = getAllStudents();
+
+                                    if (count($students) > 0):
+                                        foreach ($students as $student):
+                                    ?>
                                         <tr>
                                             <td><?php echo htmlspecialchars($student['student_id']); ?></td>
                                             <td><?php echo htmlspecialchars($student['first_name']); ?></td>
                                             <td><?php echo htmlspecialchars($student['last_name']); ?></td>
-                                            <td>
-                                                <button class="btn btn-sm btn-info">Edit</button>
-                                                <button class="btn btn-sm btn-danger">Delete</button>
-                                            </td>
+                                            <td class>
+                                                <a href="edit.php?id=<?php echo htmlspecialchars($student['id']); ?>" class="btn btn-sm btn-info">Edit</a>
+                                                <a href="delete.php?id=<?php echo htmlspecialchars($student['id']); ?>" class="btn btn-sm btn-danger">Delete</a>
+                                            </td> 
                                         </tr>
-                                    <?php endforeach; ?>
-                                <?php else: ?>
-                                    <tr>
-                                        <td colspan="4" class="text-center">No students available.</td>
-                                    </tr>
-                                <?php endif; ?>
-
+                                    <?php
+                                        endforeach;
+                                    else:
+                                    ?>
+                                        <tr>
+                                            <td colspan="4" class="text-center">No students available.</td>
+                                        </tr>
+                                    <?php endif; ?>
                                 </tbody>
                             </table>
                         </div>
