@@ -1,3 +1,7 @@
 <?php
-    // Logout Code Here
+
+include 'functions.php'; // Include the functions file
+logout(); // Call the logout function
+
+
 ?>

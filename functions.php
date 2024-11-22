@@ -132,3 +132,10 @@ function deleteSubject($subject_id, $conn) {
     
     return $delete_stmt->execute();
 }
+
+function logout() {
+    session_start(); 
+    session_destroy(); 
+    header("Location: ../index.php"); // Redirect to login page
+    exit(); 
+}
