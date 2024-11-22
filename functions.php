@@ -114,12 +114,16 @@ function insertSubject($subject_code, $subject_name, &$errors) {
     }
 }
 function getSubjectDetails($subject_id, $conn) {
-    $query = "SELECT * FROM subjects WHERE id = :id";
-    $stmt = $conn->prepare($query);
+    $stmt = $conn->prepare("SELECT * FROM subjects WHERE id = :id");
     $stmt->bindParam(':id', $subject_id, PDO::PARAM_INT);
     $stmt->execute();
-    return $stmt->fetch(PDO::FETCH_ASSOC);
+    $subject = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($subject === false) {
+        error_log("Subject not found with ID: " . $subject_id);  // Log if not found
+    }
+    return $subject;
 }
+
 
 // Function to delete a subject from the database
 function deleteSubject($subject_id, $conn) {
@@ -234,3 +238,36 @@ function updateStudentData($student_id, $first_name, $last_name) {
         return false;
     }
 }
+
+// Function to get details of a student by ID
+function getStudentDetails($student_id, $conn) {
+    try {
+        // Query to fetch student details
+        $query = "SELECT * FROM students WHERE id = :student_id";
+        $stmt = $conn->prepare($query);
+        $stmt->bindParam(':student_id', $student_id, PDO::PARAM_INT);
+        $stmt->execute();
+
+        // Return the student data as an associative array
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        return false; // Return false if there's an error
+    }
+}
+
+// Function to delete a student from the database
+function deleteStudent($student_id, $conn) {
+    try {
+        // Query to delete the student record
+        $query = "DELETE FROM students WHERE id = :student_id";
+        $stmt = $conn->prepare($query);
+        $stmt->bindParam(':student_id', $student_id, PDO::PARAM_INT);
+
+        // Execute and return success/failure result
+        return $stmt->execute();
+    } catch (PDOException $e) {
+        return false; // Return false if an error occurs
+    }
+}
+
+
